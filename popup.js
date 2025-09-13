@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'tweet-sharer': { name: 'Tweet Sharer', icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>', category: 'social' },
         'unit-converter': { name: 'Unit Converter', icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.17 12H2.83"/><path d="M10.59 5.59L14.17 2"/><path d="M10.59 18.41L14.17 22"/><path d="M3.83 7l-3 5 3 5"/><path d="M20.17 7l3 5-3 5"/></svg>', category: 'utility' },
         'timer': { name: 'Timer', icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>', category: 'utility' },
+        'element-swapper': { name: 'Element Swapper', icon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3.13a4 4 0 0 1 0 7.75L4 21l3-10 9-4.5Z"/><path d="M17.5 10.5c1.5-1.5 3.5-1.5 5 0s1.5 3.5 0 5-3.5 1.5-5 0"/><path d="m2 2 7.586 7.586"/></svg>', category: 'developer' },
     };
 
     const toolsGrid = document.getElementById('tools-grid');
@@ -58,7 +59,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (isAdded) {
-            card.addEventListener('click', () => {});
+            card.addEventListener('click', () => {
+                if (toolId === 'element-swapper') {
+                    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                        if (tabs.length > 0) {
+                            const tabId = tabs[0].id;
+                            chrome.scripting.insertCSS({
+                                target: { tabId: tabId },
+                                files: ["styles.css"]
+                            }, () => {
+                                chrome.scripting.executeScript({
+                                    target: { tabId: tabId },
+                                    files: ["content.js"]
+                                }, () => {
+                                    window.close();
+                                });
+                            });
+                        }
+                    });
+                }
+            });
         }
 
         return card;

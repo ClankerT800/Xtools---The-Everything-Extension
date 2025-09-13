@@ -1,0 +1,187 @@
+
+
+.xtools-highlighter-overlay, .xtools-highlighter-border {
+    position: absolute;
+    z-index: 2147483645; /* Below overlay, above page */
+    pointer-events: none; /* Must not interfere with mouse events */
+    display: none; /* Hidden by default */
+}
+
+.xtools-highlighter-overlay {
+    background-color: rgba(100, 150, 255, 0.2);
+}
+
+.xtools-highlighter-border {
+    background-color: rgba(100, 150, 255, 0.7);
+}
+
+.xtools-text-editing {
+  outline: 2px solid #007bff !important;
+}
+
+.xtools-dropzone {
+  position: absolute;
+  border: 2px dashed grey !important;
+  border-radius: 8px !important;
+  background-color: rgba(240, 240, 240, 0.9) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  z-index: 2147483647 !important; /* Max z-index */
+  color: #555 !important;
+  font-family: sans-serif !important;
+  font-size: 16px !important;
+  text-align: center !important;
+  cursor: pointer !important;
+}
+
+.xtools-dropzone-icon {
+    margin-bottom: 8px;
+}
+
+.xtools-dropzone-text {
+    font-weight: bold;
+}
+
+.xtools-dropzone-close-btn {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #555;
+    cursor: pointer;
+}
+
+.xtools-top-bar {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(20, 20, 20, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 8px 16px;
+    z-index: 2147483647;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-family: sans-serif;
+    color: white;
+    font-size: 14px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.xtools-bar-title {
+    font-weight: 600;
+}
+
+.xtools-bar-switch .switch {
+    position: relative;
+    display: inline-block;
+    width: 38px;
+    height: 22px;
+}
+
+.xtools-bar-switch .switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.xtools-bar-switch .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #444;
+    transition: .4s;
+}
+
+.xtools-bar-switch .slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+}
+
+.xtools-bar-switch input:checked + .slider {
+    background-color: #007bff;
+}
+
+.xtools-bar-switch input:checked + .slider:before {
+    transform: translateX(15px);
+}
+
+.xtools-bar-switch .slider.round {
+    border-radius: 22px;
+}
+
+.xtools-bar-switch .slider.round:before {
+    border-radius: 50%;
+}
+
+.xtools-bar-close-btn {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.xtools-bar-close-btn:hover {
+    color: white;
+}
+
+.xtools-seamless-input {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    overflow: hidden !important;
+}
+
+.xtools-seamless-input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+
+.xtools-page-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2147483646; /* Just below the tool UI */
+    cursor: default;
+}
+
+
+.xtools-dropzone--small .xtools-dropzone-text {
+    display: none;
+}
+
+.xtools-dropzone--small .xtools-dropzone-icon svg {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+}
+
+
+
