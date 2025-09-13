@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xtools - the everything extension</title>
+    <link rel="stylesheet" href="popup.css">
+    <script src="./lib/qrcode.min.js"></script>
+</head>
+<body>
+    <div id="main-view">
+        <header class="navbar">
+            <div class="nav-left">
+                <button id="settings-btn" class="icon-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                </button>
+                <span class="logo-text">Xtools</span>
+            </div>
+            <div class="nav-right">
+                <a href="https://x.com/ClankerT800" target="_blank" class="icon-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865l8.875 11.633Z"/></svg>
+                </a>
+                <a href="https://www.buymeacoffee.com/clankert800" target="_blank">
+                    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" class="bmc-button">
+                </a>
+            </div>
+        </header>
+
+        <main class="content-area">
+            <div id="tools-grid" class="tools-grid"></div>
+        </main>
+
+        <footer class="footer-area">
+            <div class="background-tools-header">Tools in Background</div>
+            <div class="background-tool-card">
+                <span>Image Downloader</span>
+                <label class="switch">
+                    <input type="checkbox" id="image-downloader-toggle" checked>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="background-tool-card">
+                <span>Text Formatter</span>
+                <label class="switch">
+                    <input type="checkbox" id="text-formatter-toggle" checked>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </footer>
+        <div class="add-tool-btn-container">
+            <button id="add-tool-btn" class="add-tool-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Add Tool</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="add-tool-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Tools</h3>
+                <button id="modal-close-btn" class="icon-btn">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-nav">
+                <button class="modal-nav-btn active" data-category="all">All</button>
+                <button class="modal-nav-btn" data-category="media">Media</button>
+                <button class="modal-nav-btn" data-category="utility">Utility</button>
+                <button class="modal-nav-btn" data-category="developer">Developer</button>
+                <button class="modal-nav-btn" data-category="social">Social</button>
+            </div>
+            <div id="modal-tools-grid" class="tools-grid modal-grid"></div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
