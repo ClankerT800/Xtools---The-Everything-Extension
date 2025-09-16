@@ -29,6 +29,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let activeTools = [];
 
+    const withActiveTab = (fn) => {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs && tabs.length) fn(tabs[0].id);
+        });
+    };
+
     const createToolCard = (toolId, isAdded) => {
         const tool = ALL_TOOLS[toolId];
         const card = document.createElement('div');
@@ -61,21 +67,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isAdded) {
             card.addEventListener('click', () => {
                 if (toolId === 'element-swapper') {
-                    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                        if (tabs.length > 0) {
-                            const tabId = tabs[0].id;
-                            chrome.scripting.insertCSS({
-                                target: { tabId: tabId },
-                                files: ["styles.css"]
-                            }, () => {
-                                chrome.scripting.executeScript({
-                                    target: { tabId: tabId },
-                                    files: ["content.js"]
-                                }, () => {
-                                    window.close();
-                                });
+                    withActiveTab((tabId) => {
+                        chrome.scripting.insertCSS({ target: { tabId }, files: ["styles.css"] }, () => {
+                            chrome.scripting.executeScript({ target: { tabId }, files: ["content.js"] }, () => {
+                                window.close();
                             });
-                        }
+                        });
+                    });
+                } else if (toolId === 'color-picker') {
+                    withActiveTab((tabId) => {
+                        chrome.scripting.executeScript({ target: { tabId }, files: ["color-picker.js"] }, () => {
+                            window.close();
+                        });
                     });
                 }
             });

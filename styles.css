@@ -1,10 +1,8 @@
-
-
 .xtools-highlighter-overlay, .xtools-highlighter-border {
     position: absolute;
-    z-index: 2147483645; /* Below overlay, above page */
-    pointer-events: none; /* Must not interfere with mouse events */
-    display: none; /* Hidden by default */
+    z-index: 2147483645;
+    pointer-events: none;
+    display: none;
 }
 
 .xtools-highlighter-overlay {
@@ -28,7 +26,7 @@
   flex-direction: column !important;
   justify-content: center !important;
   align-items: center !important;
-  z-index: 2147483647 !important; /* Max z-index */
+  z-index: 2147483647 !important;
   color: #555 !important;
   font-family: sans-serif !important;
   font-size: 16px !important;
@@ -168,20 +166,47 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 2147483646; /* Just below the tool UI */
+    z-index: 2147483646;
     cursor: default;
 }
 
 
-.xtools-dropzone--small .xtools-dropzone-text {
+.xtools-dropzone--small .xtools-dropzone-text,
+.xtools-dropzone--small .xtools-dropzone-icon {
     display: none;
 }
 
-.xtools-dropzone--small .xtools-dropzone-icon svg {
-    width: 20px;
-    height: 20px;
-    margin: 0;
+.xtools-dropzone-icon-small {
+    font-size: 32px;
+    font-weight: bold;
+    color: #555;
+    background-color: white;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
+.xtools-text-editing-toolbar {
+    position: absolute;
+    z-index: 2147483647;
+    background-color: #333;
+    border-radius: 5px;
+    padding: 5px;
+    display: flex;
+    gap: 5px;
+}
 
+.xtools-text-editing-toolbar button {
+    background-color: #555;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
 
+.xtools-text-editing-toolbar button:hover {
+    background-color: #777;
+}

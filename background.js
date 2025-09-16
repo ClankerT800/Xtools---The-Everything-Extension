@@ -1,34 +1,13 @@
 function createContextMenu() {
-  chrome.contextMenus.create({
-    id: "saveImageAs",
-    title: "Save image as",
-    contexts: ["image"]
-  });
-
+  chrome.contextMenus.create({ id: "saveImageAs", title: "Save image as", contexts: ["image"] });
   const imageFormats = ["PNG", "JPG"];
-  imageFormats.forEach(format => {
-    chrome.contextMenus.create({
-      id: `saveImageAs-${format}`,
-      parentId: "saveImageAs",
-      title: format,
-      contexts: ["image"]
-    });
+  imageFormats.forEach((format) => {
+    chrome.contextMenus.create({ id: `saveImageAs-${format}`, parentId: "saveImageAs", title: format, contexts: ["image"] });
   });
-
-  chrome.contextMenus.create({
-    id: "saveVideoAs",
-    title: "Save video as",
-    contexts: ["video"]
-  });
-
+  chrome.contextMenus.create({ id: "saveVideoAs", title: "Save video as", contexts: ["video"] });
   const videoFormats = ["MP4", "MP3"];
-  videoFormats.forEach(format => {
-    chrome.contextMenus.create({
-      id: `saveVideoAs-${format}`,
-      parentId: "saveVideoAs",
-      title: format,
-      contexts: ["video"]
-    });
+  videoFormats.forEach((format) => {
+    chrome.contextMenus.create({ id: `saveVideoAs-${format}`, parentId: "saveVideoAs", title: format, contexts: ["video"] });
   });
 }
 
@@ -37,24 +16,19 @@ function removeContextMenu() {
 }
 
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.storage.sync.get(['imageDownloaderEnabled'], function(result) {
-    if (result.imageDownloaderEnabled !== false) {
-      createContextMenu();
-    }
+  chrome.storage.sync.get(["imageDownloaderEnabled"], (result) => {
+    if (result.imageDownloaderEnabled !== false) createContextMenu();
   });
 });
 
-chrome.storage.onChanged.addListener(function(changes, namespace) {
+chrome.storage.onChanged.addListener((changes) => {
   if (changes.imageDownloaderEnabled) {
-    if (changes.imageDownloaderEnabled.newValue) {
-      createContextMenu();
-    } else {
-      removeContextMenu();
-    }
+    if (changes.imageDownloaderEnabled.newValue) createContextMenu();
+    else removeContextMenu();
   }
 });
 
-chrome.contextMenus.onClicked.addListener((info, tab) => {
+chrome.contextMenus.onClicked.addListener((info) => {
   const menuItemId = info.menuItemId;
   const srcUrl = info.srcUrl;
 
@@ -69,22 +43,23 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
 async function downloadMedia(url, format) {
   try {
-    const blob = await fetch(url).then(r => r.blob());
+    const blob = await fetch(url).then((r) => r.blob());
     const imageBitmap = await createImageBitmap(blob);
 
     const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
 
-    if (format.toLowerCase() === 'jpg') {
-      ctx.fillStyle = 'white';
+    const lower = format.toLowerCase();
+    if (lower === "jpg") {
+      ctx.fillStyle = "white";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
     ctx.drawImage(imageBitmap, 0, 0);
 
-    let mimeType = `image/${format.toLowerCase()}`;
-    if (format.toLowerCase() === 'jpg') {
-      mimeType = 'image/jpeg';
+    let mimeType = `image/${lower}`;
+    if (lower === "jpg") {
+      mimeType = "image/jpeg";
     }
 
     const outputBlob = await canvas.convertToBlob({ type: mimeType });
@@ -97,7 +72,7 @@ async function downloadMedia(url, format) {
 
     chrome.downloads.download({
       url: dataUrl,
-      filename: `download.${format.toLowerCase()}`
+      filename: `download.${lower}`
     });
   } catch (error) {
     chrome.downloads.download({
@@ -106,3 +81,12 @@ async function downloadMedia(url, format) {
     });
   }
 }
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "captureVisibleTab") {
+    chrome.tabs.captureVisibleTab(null, { format: "png" }, (dataUrl) => {
+      sendResponse({ dataUrl });
+    });
+    return true;
+  }
+});

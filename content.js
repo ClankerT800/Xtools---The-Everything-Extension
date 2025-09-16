@@ -5,7 +5,7 @@
         return;
     }
 
-    const EDITABLE_TEXT_SELECTOR = 'p, h1, h2, h3, h4, h5, h6, span, time, a, li, strong, em, b, i';
+    const EDITABLE_TEXT_SELECTOR = 'p, h1, h2, h3, h4, h5, h6, span, time, a, div, li, strong, em, b, i';
     const EDITABLE_MEDIA_SELECTOR = 'img, svg, mp4, video, canvas';
 
     const initialState = {
@@ -21,7 +21,17 @@
     let state = window[stateKey];
     state.deactivate = deactivate;
 
-    // --- FUNCTION SHELLS (to be replaced) ---
+    function getElementPosition(element) {
+        let current = element;
+        while (current && current !== document.body) {
+            if (window.getComputedStyle(current).position === 'fixed') {
+                return 'fixed';
+            }
+            current = current.parentElement;
+        }
+        return 'absolute';
+    }
+
     function createHighlighter() {
         const container = document.createElement('div');
         const overlay = document.createElement('div');
@@ -63,8 +73,10 @@
         const editor = state.activeEditor;
 
         if (editor.type === 'text') {
-            if (editor.element) editor.element.style.visibility = 'visible';
-            if (editor.textarea) editor.textarea.remove();
+            if (editor.element) {
+                editor.element.removeAttribute('contenteditable');
+                editor.element.classList.remove('xtools-text-editing');
+            }
         } else if (editor.type === 'media') {
             if (editor.dropZone) editor.dropZone.remove();
             if (editor.fileInput) editor.fileInput.remove();
@@ -156,10 +168,6 @@
 
     function handleMouseMove(event) {
         if (!state.isEditingEnabled) { hideHighlighter(); return; }
-        
-        if (state.activeEditor) {
-            return;
-        }
 
         state.pageOverlay.style.pointerEvents = 'none';
         const target = document.elementFromPoint(event.clientX, event.clientY);
@@ -194,16 +202,30 @@
     function updateHighlighter(target) {
         const rect = target.getBoundingClientRect();
         const h = state.highlighter;
-        h.overlay.style.left = `${rect.left + window.scrollX}px`;
-        h.overlay.style.top = `${rect.top + window.scrollY}px`;
+        const position = getElementPosition(target);
+
+        const scrollX = (position === 'absolute') ? window.scrollX : 0;
+        const scrollY = (position === 'absolute') ? window.scrollY : 0;
+
+        h.overlay.style.position = position;
+        h.overlay.style.left = `${rect.left + scrollX}px`;
+        h.overlay.style.top = `${rect.top + scrollY}px`;
         h.overlay.style.width = `${rect.width}px`;
         h.overlay.style.height = `${rect.height}px`;
         h.overlay.style.display = 'block';
+
         const borderWidth = 2;
-        h.borders.top.style.cssText = `left: ${rect.left + window.scrollX}px; top: ${rect.top + window.scrollY}px; width: ${rect.width}px; height: ${borderWidth}px; display: block;`;
-        h.borders.bottom.style.cssText = `left: ${rect.left + window.scrollX}px; top: ${rect.bottom + window.scrollY - borderWidth}px; width: ${rect.width}px; height: ${borderWidth}px; display: block;`;
-        h.borders.left.style.cssText = `left: ${rect.left + window.scrollX}px; top: ${rect.top + window.scrollY}px; width: ${borderWidth}px; height: ${rect.height}px; display: block;`;
-        h.borders.right.style.cssText = `left: ${rect.right + window.scrollX - borderWidth}px; top: ${rect.top + window.scrollY}px; width: ${borderWidth}px; height: ${rect.height}px; display: block;`;
+        const bordersCss = {
+            top: `left: ${rect.left + scrollX}px; top: ${rect.top + scrollY}px; width: ${rect.width}px; height: ${borderWidth}px; display: block; position: ${position};`,
+            bottom: `left: ${rect.left + scrollX}px; top: ${rect.bottom - borderWidth + scrollY}px; width: ${rect.width}px; height: ${borderWidth}px; display: block; position: ${position};`,
+            left: `left: ${rect.left + scrollX}px; top: ${rect.top + scrollY}px; width: ${borderWidth}px; height: ${rect.height}px; display: block; position: ${position};`,
+            right: `left: ${rect.right - borderWidth + scrollX}px; top: ${rect.top + scrollY}px; width: ${borderWidth}px; height: ${rect.height}px; display: block; position: ${position};`
+        };
+
+        h.borders.top.style.cssText = bordersCss.top;
+        h.borders.bottom.style.cssText = bordersCss.bottom;
+        h.borders.left.style.cssText = bordersCss.left;
+        h.borders.right.style.cssText = bordersCss.right;
     }
 
     function hideHighlighter() {
@@ -217,82 +239,65 @@
     }
 
     function createTextEditor(element) {
-        element.style.visibility = 'hidden';
-        const rect = element.getBoundingClientRect();
-        const computedStyle = window.getComputedStyle(element);
-    
-        const textarea = document.createElement('textarea');
-        textarea.className = 'xtools-seamless-input';
+        element.setAttribute('contenteditable', 'true');
+        element.classList.add('xtools-text-editing');
+        element.focus();
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        selection.removeAllRanges();
+        selection.addRange(range);
 
-        const sourceHTML = element.innerHTML.replace(/<br\s*\/?>/gi, '\n');
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = sourceHTML;
-        textarea.value = tempDiv.textContent || tempDiv.innerText || "";
-    
-        Object.assign(textarea.style, {
-            position: 'absolute',
-            left: `${rect.left + window.scrollX}px`,
-            top: `${rect.top + window.scrollY}px`,
-            width: `${rect.width}px`,
-            height: `auto`,
-            font: computedStyle.font,
-            color: computedStyle.color,
-            padding: computedStyle.padding,
-            margin: computedStyle.margin,
-            textAlign: computedStyle.textAlign,
-            lineHeight: computedStyle.lineHeight,
-            letterSpacing: computedStyle.letterSpacing,
-            wordSpacing: computedStyle.wordSpacing,
-            textTransform: computedStyle.textTransform,
-            textIndent: computedStyle.textIndent,
-            whiteSpace: computedStyle.whiteSpace,
-            wordWrap: computedStyle.wordWrap,
-            wordBreak: computedStyle.wordBreak,
-            boxSizing: 'border-box',
-            zIndex: '2147483647'
-        });
-    
-        document.body.appendChild(textarea);
+        state.activeEditor = { type: 'text', element };
 
-        textarea.style.height = `${textarea.scrollHeight}px`;
-        textarea.addEventListener('input', () => {
-            textarea.style.height = 'auto';
-            textarea.style.height = `${textarea.scrollHeight}px`;
-        });
-
-        textarea.focus();
-        textarea.select();
-    
-        state.activeEditor = { type: 'text', element, textarea };
-    
         const saveAndCleanup = () => {
-            element.textContent = textarea.value;
+            element.removeAttribute('contenteditable');
+            element.classList.remove('xtools-text-editing');
             cleanup();
         };
-    
-        textarea.addEventListener('blur', saveAndCleanup);
-        textarea.addEventListener('keydown', (e) => {
+
+        element.addEventListener('blur', saveAndCleanup, { once: true });
+        element.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 saveAndCleanup();
             }
+            if (e.key === 'Escape') {
+                if (state.activeEditor.originalHTML) {
+                    element.innerHTML = state.activeEditor.originalHTML;
+                }
+                saveAndCleanup();
+            }
             e.stopPropagation();
         });
+        state.activeEditor.originalHTML = element.innerHTML;
     }
 
     function createImageEditor(targetElement) {
         const rect = targetElement.getBoundingClientRect();
+        const position = getElementPosition(targetElement);
         const dropZone = document.createElement('div');
         dropZone.className = 'xtools-dropzone';
-        if (rect.width < 60 || rect.height < 40) dropZone.classList.add('xtools-dropzone--small');
-        dropZone.style.left = `${rect.left + window.scrollX}px`;
-        dropZone.style.top = `${rect.top + window.scrollY}px`;
+
+        const scrollX = (position === 'absolute') ? window.scrollX : 0;
+        const scrollY = (position === 'absolute') ? window.scrollY : 0;
+
+        dropZone.style.position = position;
+        dropZone.style.left = `${rect.left + scrollX}px`;
+        dropZone.style.top = `${rect.top + scrollY}px`;
         dropZone.style.width = `${rect.width}px`;
         dropZone.style.height = `${rect.height}px`;
-        dropZone.innerHTML = '<button class="xtools-dropzone-close-btn">&times;</button><div class="xtools-dropzone-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"></path><line x1="16" y1="5" x2="22" y2="5"></line><line x1="19" y1="2" x2="19" y2="8"></line><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg></div><div class="xtools-dropzone-text">Drop image or click</div>';
+
+        if (rect.width < 60 || rect.height < 40) {
+            dropZone.classList.add('xtools-dropzone--small');
+            dropZone.innerHTML = '<div class="xtools-dropzone-icon-small">+</div>';
+        } else {
+            dropZone.innerHTML = '<button class="xtools-dropzone-close-btn">&times;</button><div class="xtools-dropzone-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"></path><line x1="16" y1="5" x2="22" y2="5"></line><line x1="19" y1="2" x2="19" y2="8"></line><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg></div><div class="xtools-dropzone-text">Drop image or click</div>';
+        }
+
         document.body.appendChild(dropZone);
 
-        dropZone.querySelector('.xtools-dropzone-close-btn').addEventListener('click', (e) => {
+        dropZone.querySelector('.xtools-dropzone-close-btn')?.addEventListener('click', (e) => {
             e.stopPropagation();
             cleanup();
         });
@@ -309,7 +314,7 @@
             if (!file) { cleanup(); return; }
             const newSrc = URL.createObjectURL(file);
 
-            if (file.type.startsWith('image/') && targetElement.matches('img, svg')) {
+            if (file.type.startsWith('image/') && targetElement.matches('img, svg, canvas')) {
                 const newImg = new Image();
                 newImg.onload = () => {
                     const canvas = document.createElement('canvas');
@@ -323,7 +328,10 @@
                     if (imgRatio > canvasRatio) { sWidth = newImg.naturalHeight * canvasRatio; sx = (newImg.naturalWidth - sWidth) / 2; } 
                     else { sHeight = newImg.naturalWidth / canvasRatio; sy = (newImg.naturalHeight - sHeight) / 2; }
                     ctx.drawImage(newImg, sx, sy, sWidth, sHeight, 0, 0, canvas.width, canvas.height);
-                    if (targetElement.parentNode) targetElement.parentNode.replaceChild(canvas, targetElement);
+                    if (targetElement.parentNode) {
+                        targetElement.parentNode.replaceChild(canvas, targetElement);
+                        state.activeEditor.element = canvas;
+                    }
                     cleanup();
                     URL.revokeObjectURL(newSrc);
                 };
@@ -342,7 +350,6 @@
         fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
     }
 
-    // Initial call to start the tool
     activate();
 
 })();
